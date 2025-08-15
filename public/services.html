@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>NEURO FUSION — Услуги</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <nav class="nav">
+    <div class="brand" onclick="location.href='/'"><div class="logo"></div><h1>NEURO FUSION</h1></div>
+    <div class="nav-links">
+      <a href="index.html">Главная</a>
+      <a href="about.html">О нас</a>
+      <a class="active" href="services.html">Услуги</a>
+      <a href="platform.html">TG-платформа</a>
+      <a class="cta" href="contacts.html">Контакты</a>
+      <button class="btn small" id="themeBtn">🌓</button>
+    </div>
+  </nav>
+
+  <main class="page">
+    <h3 class="section-title">НАШИ УСЛУГИ</h3>
+
+    <div class="grid three">
+      <div class="card svc" data-tag="mag">
+        <span class="badge">01</span>
+        <h3>ТЕЛЕГРАМ-МАГАЗИНЫ</h3>
+        <p>Каталог до 1000 товаров, оплаты (ЮMoney/Т-Банк), логистика СДЭК, аналитика.</p>
+        <a class="btn small" href="contacts.html">Подробнее</a>
+      </div>
+      <div class="card svc" data-tag="voice">
+        <span class="badge">02</span>
+        <h3>ГОЛОСОВЫЕ НЕЙРО-ПРОДАВЦЫ</h3>
+        <p>ИИ-оператор на GPT: живые диалоги, 30 звонков/мин, 10k+/день, интеграции и отчётность.</p>
+        <a class="btn small" href="contacts.html">Подробнее</a>
+      </div>
+      <div class="card svc" data-tag="text">
+        <span class="badge">03</span>
+        <h3>ТЕКСТОВЫЕ НЕЙРО-КОНСУЛЬТАНТЫ</h3>
+        <p>FAQ, лид-сбор → CRM/почта/таблица. Каналы: сайт-виджет, Telegram, Авито PRO.</p>
+        <a class="btn small" href="contacts.html">Подробнее</a>
+      </div>
+      <div class="card svc" data-tag="it">
+        <span class="badge">04</span>
+        <h3>IT-РАЗРАБОТКА</h3>
+        <p>CashPad, Медбот, Асиста и другие отраслевые решения.</p>
+        <a class="btn small" href="contacts.html">Подробнее</a>
+      </div>
+      <div class="card svc" data-tag="tg">
+        <span class="badge">05</span>
+        <h3>TG-ПЛАТФОРМА</h3>
+        <p>Мини-сайт внутри Telegram: автоворонки, оплата, сценарии общения.</p>
+        <a class="btn small" href="platform.html">Подробнее</a>
+      </div>
+    </div>
+
+    <div class="tabs mt">
+      <button class="tab active" data-tab="mag">Магазины</button>
+      <button class="tab" data-tab="voice">Голосовые продавцы</button>
+      <button class="tab" data-tab="text">Текстовые консультанты</button>
+      <button class="tab" data-tab="it">IT-разработка</button>
+      <button class="tab" data-tab="tg">TG-платформа</button>
+    </div>
+
+    <div class="tabpanes">
+      <div class="tabpane active" data-tab="mag">
+        <ul>
+          <li>Каталог до 1000 товаров (поиск, фильтры)</li>
+          <li>Оплаты: ЮMoney / Т-Банк</li>
+          <li>Логистика: СДЭК</li>
+          <li>Аналитика и план развития канала</li>
+        </ul>
+        <a class="btn btn-primary" href="contacts.html">Запросить расчёт</a>
+      </div>
+      <div class="tabpane" data-tab="voice">
+        <ul>
+          <li>GPT + ваша база знаний</li>
+          <li>30 звонков/мин, 10 000+/день</li>
+          <li>Интеграции: CRM, email</li>
+          <li>Создание 3–5 дней</li>
+        </ul>
+        <a class="btn btn-primary" href="contacts.html">Запустить пилот</a>
+      </div>
+      <div class="tabpane" data-tab="text">
+        <ul>
+          <li>Виджет на сайт, Telegram, Авито PRO</li>
+          <li>FAQ, помощь в выборе, ведение к заказу</li>
+          <li>Лид-сбор → CRM/почта/таблица</li>
+        </ul>
+        <a class="btn btn-primary" href="contacts.html">Получить демо</a>
+      </div>
+      <div class="tabpane" data-tab="it">
+        <p><b>CashPad</b>, <b>Медбот</b>, <b>Асиста</b>, а также решения для общепита, розницы и спец-кейсы.</p>
+        <a class="btn btn-primary" href="contacts.html">Обсудить задачу</a>
+      </div>
+      <div class="tabpane" data-tab="tg">
+        <p>Ваш мини-сайт внутри Telegram: автоворонки, оплата, сценарии общения. Больше заявок и понятные метрики.</p>
+        <a class="btn btn-primary" href="platform.html">Подробнее</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>© 2025 Neuro Fusion</footer>
+  <script src="assets/app.js"></script>
+</body>
+</html>
