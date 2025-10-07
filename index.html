@@ -19,21 +19,39 @@
       --border:rgba(255,255,255,.08);
       --shadow:0 10px 30px rgba(0,0,0,.25);
       --radius:18px;
+      --surface:#1d2128;
+      --surface-alt:#191c22;
+      --glass:rgba(0,0,0,.5);
+      --text-strong:#ffffff;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
       margin:0; font-family:system-ui,-apple-system,Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, "Noto Sans", sans-serif;
       background:linear-gradient(180deg,var(--bg), #13151a 60%);
-      color:var(--text); overflow-x:hidden;
+      color:var(--text); overflow-x:hidden; transition:background .35s ease, color .35s ease;
+    }
+    body.theme-light{
+      --bg:#f6f7fb;
+      --card:#ffffff;
+      --text:#1f2328;
+      --muted:#5c6470;
+      --border:rgba(15,17,26,.12);
+      --shadow:0 12px 30px rgba(15,16,17,.12);
+      --surface:#f1f3f9;
+      --surface-alt:#f8f9fc;
+      --glass:rgba(255,255,255,.7);
+      --text-strong:#111827;
+      background:linear-gradient(180deg,var(--bg), #e8ebf7 60%);
     }
     .app{
       max-width:980px; margin:0 auto; padding:16px 14px 120px; position:relative;
     }
     header{
-      display:flex; align-items:center; gap:12px; margin-bottom:14px;
+      display:flex; align-items:center; gap:12px; margin-bottom:14px; justify-content:space-between;
     }
-    .logo{
+    .hero{display:flex; align-items:center; gap:12px;}
+    .logo{ 
       width:40px; height:40px; border-radius:12px; background:linear-gradient(135deg,var(--brand),#7c4dff);
       display:grid; place-items:center; box-shadow:var(--shadow);
     }
@@ -41,6 +59,13 @@
     .title-wrap{display:flex; flex-direction:column}
     .title{margin:0; font-size:20px; font-weight:800}
     .subtitle{margin:0; font-size:12px; color:var(--muted)}
+
+    .mode-toggle{
+      border:1px solid var(--border); background:var(--card); color:var(--text);
+      border-radius:14px; padding:8px 12px; display:flex; align-items:center; gap:6px;
+      cursor:pointer; font-size:13px; font-weight:600; box-shadow:var(--shadow);
+    }
+    .mode-toggle:focus-visible{outline:2px solid var(--brand); outline-offset:2px;}
 
     .toolbar{display:flex; gap:10px; margin:12px 0 8px; flex-wrap:wrap}
     .search{flex:1; min-width:220px; display:flex; align-items:center; gap:6px; background:var(--card); border-radius:14px; border:1px solid var(--border); padding:8px 12px}
@@ -56,16 +81,16 @@
     .card{grid-column:span 4; background:var(--card); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow); display:flex; flex-direction:column}
     .img{position:relative; padding-top:66%; background:#20242a}
     .img img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover}
-    .fav{position:absolute; right:10px; top:10px; background:rgba(0,0,0,.5); backdrop-filter:blur(8px); border:1px solid var(--border); border-radius:12px; padding:6px; cursor:pointer}
+    .fav{position:absolute; right:10px; top:10px; background:var(--glass); backdrop-filter:blur(8px); border:1px solid var(--border); border-radius:12px; padding:6px; cursor:pointer}
 
     .card .b{padding:12px}
     .name{font-weight:700; margin:0 0 4px; font-size:15px}
     .meta{display:flex; justify-content:space-between; align-items:center; color:var(--muted); font-size:12px; margin-bottom:10px}
-    .price{font-size:16px; font-weight:800; color:white}
-    .btn{width:100%; padding:10px 12px; border-radius:12px; border:1px solid var(--border); background:#1d2128; color:var(--text); cursor:pointer}
+    .price{font-size:16px; font-weight:800; color:var(--text-strong)}
+    .btn{width:100%; padding:10px 12px; border-radius:12px; border:1px solid var(--border); background:var(--surface); color:var(--text); cursor:pointer}
     .btn.primary{background:linear-gradient(135deg,var(--brand),#7c4dff); border-color:transparent; color:white; font-weight:700}
     .qty{display:flex; align-items:center; gap:8px}
-    .qty button{width:28px; height:28px; border-radius:10px; border:1px solid var(--border); background:#1d2128; color:var(--text); cursor:pointer}
+    .qty button{width:28px; height:28px; border-radius:10px; border:1px solid var(--border); background:var(--surface); color:var(--text); cursor:pointer}
 
     .fab-cart{position:fixed; right:16px; bottom:80px; background:linear-gradient(135deg,var(--brand),#7c4dff); color:white; border:none; border-radius:999px; padding:12px 14px; font-weight:800; box-shadow:var(--shadow); display:flex; gap:8px; align-items:center; z-index:20}
     .badge{background:#111; border:1px solid var(--border); color:#fff; font-size:12px; padding:2px 8px; border-radius:999px}
@@ -76,7 +101,7 @@
     .drawer .panel{position:absolute; left:50%; bottom:0; transform:translateX(-50%); width:min(960px,100%); background:var(--card); border-top-left-radius:24px; border-top-right-radius:24px; border:1px solid var(--border); box-shadow:var(--shadow); max-height:80%; overflow:auto}
     .cart-head{display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid var(--border)}
     .cart-list{padding:8px 14px; display:flex; flex-direction:column; gap:10px}
-    .cart-item{display:grid; grid-template-columns:64px 1fr auto; gap:10px; align-items:center; background:#191c22; border:1px solid var(--border); border-radius:14px; padding:8px}
+    .cart-item{display:grid; grid-template-columns:64px 1fr auto; gap:10px; align-items:center; background:var(--surface-alt); border:1px solid var(--border); border-radius:14px; padding:8px}
     .cart-item img{width:64px; height:64px; object-fit:cover; border-radius:10px}
     .cart-item .ttl{font-weight:700}
     .cart-item .sub{color:var(--muted); font-size:12px}
@@ -85,7 +110,7 @@
     .checkout{padding:14px 16px; display:none}
     .checkout.active{display:block}
     .field{display:flex; flex-direction:column; gap:6px; margin-bottom:10px}
-    .field input, .field select, .field textarea{background:#191c22; border:1px solid var(--border); border-radius:12px; padding:10px 12px; color:var(--text)}
+    .field input, .field select, .field textarea{background:var(--surface-alt); border:1px solid var(--border); border-radius:12px; padding:10px 12px; color:var(--text)}
     .row{display:grid; grid-template-columns:1fr 1fr; gap:10px}
 
     .hint{color:var(--muted); font-size:12px}
@@ -97,11 +122,17 @@
 <body>
   <div class="app">
     <header>
-      <div class="logo"><span>SC</span></div>
-      <div class="title-wrap">
-        <h1 class="title">Shop Cart Pro</h1>
-        <p class="subtitle">Каталог • Корзина • Оформление заказа</p>
+      <div class="hero">
+        <div class="logo"><span>SC</span></div>
+        <div class="title-wrap">
+          <h1 class="title">Shop Cart Pro</h1>
+          <p class="subtitle">Каталог • Корзина • Оформление заказа</p>
+        </div>
       </div>
+      <button class="mode-toggle" id="themeToggle" type="button" aria-label="Переключить тему">
+        <span aria-hidden="true">🌙</span>
+        <span class="mode-toggle-text">Тёмная</span>
+      </button>
     </header>
 
     <div class="toolbar">
@@ -179,20 +210,73 @@
   const tg = window.Telegram?.WebApp;
   const isTWA = Boolean(tg && tg.initData);
 
+  const THEME_STORAGE_KEY = 'preferred-theme';
+  const themeMeta = document.querySelector('meta[name="theme-color"]');
+  const themeToggle = document.getElementById('themeToggle');
+  const themeToggleIcon = themeToggle?.querySelector('span[aria-hidden="true"]');
+  const themeToggleText = themeToggle?.querySelector('.mode-toggle-text');
+  const themeMetaColors = { dark:'#0f1012', light:'#f6f7fb' };
+  let activeTheme = 'dark';
+
+  function applyTheme(theme, persist=true){
+    activeTheme = theme === 'light' ? 'light' : 'dark';
+    document.body.classList.toggle('theme-light', activeTheme === 'light');
+    document.documentElement.style.colorScheme = activeTheme;
+    const metaColor = themeMetaColors[activeTheme] || (activeTheme === 'light' ? '#f6f7fb' : '#0f1012');
+    if(themeMeta){ themeMeta.setAttribute('content', metaColor); }
+    if(themeToggle){
+      themeToggle.setAttribute('aria-pressed', String(activeTheme === 'light'));
+      if(themeToggleIcon) themeToggleIcon.textContent = activeTheme === 'light' ? '🌞' : '🌙';
+      if(themeToggleText) themeToggleText.textContent = activeTheme === 'light' ? 'Светлая' : 'Тёмная';
+    }
+    if(isTWA){
+      try{ tg.setHeaderColor(metaColor); tg.setBackgroundColor(metaColor); }catch(e){}
+    }
+    if(persist){ localStorage.setItem(THEME_STORAGE_KEY, activeTheme); }
+  }
+
+  const systemMedia = window.matchMedia('(prefers-color-scheme: dark)');
+  const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+  if(savedTheme){ applyTheme(savedTheme); }
+  else { applyTheme(systemMedia.matches ? 'dark' : 'light', false); }
+
+  if(systemMedia.addEventListener){
+    systemMedia.addEventListener('change', (e)=>{
+      if(!localStorage.getItem(THEME_STORAGE_KEY)){
+        applyTheme(e.matches ? 'dark' : 'light', false);
+      }
+    });
+  } else if(systemMedia.addListener){
+    systemMedia.addListener((e)=>{
+      if(!localStorage.getItem(THEME_STORAGE_KEY)){
+        applyTheme(e.matches ? 'dark' : 'light', false);
+      }
+    });
+  }
+
+  if(themeToggle){
+    themeToggle.addEventListener('click', ()=>{
+      const next = activeTheme === 'light' ? 'dark' : 'light';
+      applyTheme(next);
+    });
+  }
+
   function applyThemeFromTelegram(){
     if(!tg) return;
-    const p = tg.themeParams || {};
-    const cs = tg.colorScheme || 'dark';
-    const map = {
-      '--bg': cs==='dark' ? (p.bg_color || '#0f1012') : (p.bg_color || '#f5f6f7'),
-      '--card': cs==='dark' ? (p.secondary_bg_color || '#16181c') : (p.secondary_bg_color || '#ffffff'),
-      '--text': p.text_color || (cs==='dark'?'#e8e8ea':'#1f2328'),
-      '--muted': p.hint_color || (cs==='dark'?'#a3a6ad':'#6b7280'),
-      '--brand': p.button_color || '#46a0ff',
-      '--border': cs==='dark' ? 'rgba(255,255,255,.08)' : 'rgba(0,0,0,.08)'
-    };
-    for(const k in map){ document.documentElement.style.setProperty(k, map[k]); }
-    document.querySelector('meta[name="theme-color"]').setAttribute('content', map['--bg']);
+    const params = tg.themeParams || {};
+    const scheme = (tg.colorScheme || 'dark').toLowerCase();
+    if(params.button_color) document.documentElement.style.setProperty('--brand', params.button_color);
+    if(params.link_color) document.documentElement.style.setProperty('--accent', params.link_color);
+    if(params.destructive_text_color) document.documentElement.style.setProperty('--danger', params.destructive_text_color);
+    if(params.bg_color){
+      if(scheme === 'light') themeMetaColors.light = params.bg_color;
+      else themeMetaColors.dark = params.bg_color;
+    }
+    if(!localStorage.getItem(THEME_STORAGE_KEY)){
+      applyTheme(scheme === 'light' ? 'light' : 'dark', false);
+    } else {
+      applyTheme(activeTheme, false);
+    }
   }
 
   if(isTWA){
