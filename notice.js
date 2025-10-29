@@ -24,6 +24,8 @@
       'URL:https://www.instagram.com/smile_of_space_?igsh=MXQxOGJjeGtmenBsdw%3D%3D&utm_source=qr',
       'URL:https://vk.com/bibylon',
       'URL:https://t.me/Babylon_11',
+      'URL:https://babylon-tamara.ru',
+
       'END:VCARD'
     ].join('\r\n'); // vCard требует CRLF
     return v;
