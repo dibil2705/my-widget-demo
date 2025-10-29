@@ -94,3 +94,72 @@
   const mo = new MutationObserver(() => attachDirect());
   mo.observe(document.documentElement, { childList: true, subtree: true });
 })();
+
+
+document.addEventListener("DOMContentLoaded", function() {
+      const shareBtn = document.getElementById("shareBtn");
+      const qrContainer = document.getElementById("qrContainer");
+      const qrImage = document.getElementById("qrImage");
+      const siteUrl = "https://babylon-tamara.ru";
+
+      shareBtn.addEventListener("click", async () => {
+        // Если браузер поддерживает нативное меню «Поделиться» (Safari, iPhone)
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: "Tamara Babylon",
+              url: siteUrl
+            });
+          } catch (err) {
+            console.log("share cancelled");
+          }
+        } else {
+          // Если нет поддержки, показываем QR
+          const qrApi = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=" + encodeURIComponent(siteUrl);
+          qrImage.src = qrApi;
+          qrContainer.style.display = "block";
+        }
+      });
+    });
+
+
+      // КНОПКА ПОДЕЛИТЬСЯ_____________________________________________________
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const shareBtn = document.getElementById("shareBtn");
+  const qrBox = document.getElementById("qrBox");
+  const qrImage = document.getElementById("qrImage");
+  const siteUrl = "https://babylon-tamara.ru";
+
+  shareBtn.addEventListener("click", async () => {
+    // Проверяем поддержку Web Share API (на iPhone / Android)
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "Babylon Tamara",
+          text: "Открой Babylon Tamara",
+          url: siteUrl
+        });
+        console.log("Ссылка успешно поделена!");
+      } catch (err) {
+        console.log("Поделиться отменено пользователем");
+      }
+    } else {
+      // Если API нет — показываем QR-код
+      const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(siteUrl)}`;
+      qrImage.src = qrApi;
+      qrBox.style.display = "block";
+
+      // Добавим лёгкий fade-in для красоты
+      qrBox.style.opacity = 0;
+      setTimeout(() => {
+        qrBox.style.transition = "opacity 0.5s";
+        qrBox.style.opacity = 1;
+      }, 10);
+    }
+  });
+});
+</script>
+
+
