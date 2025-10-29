@@ -125,7 +125,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
       // КНОПКА ПОДЕЛИТЬСЯ_____________________________________________________
 
-<script>
 document.addEventListener("DOMContentLoaded", () => {
   const shareBtn = document.getElementById("shareBtn");
   const qrBox = document.getElementById("qrBox");
@@ -160,6 +159,4 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
-</script>
-
 
