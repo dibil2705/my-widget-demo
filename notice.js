@@ -1,9 +1,10 @@
 // notice.js
-document.addEventListener('DOMContentLoaded', () => {
+const waitForButton = setInterval(() => {
   const btn = document.getElementById('saveContactBtn');
-  if (!btn) return;
-
-  btn.addEventListener('click', () => {
-    alert('Контакт сохранён!');
-  });
-});
+  if (btn) {
+    clearInterval(waitForButton);
+    btn.addEventListener('click', () => {
+      alert('Контакт сохранён!');
+    });
+  }
+}, 500);
