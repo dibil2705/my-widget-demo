@@ -12,7 +12,19 @@
     return isIPhoneIPodIPad || isIPadOS13Plus;
   })();
 
-  // --- 1.1) Android/Web Share L2: шаринг .vcf через системное меню ---
+  // --- 1.1) Детектор встроенных браузеров (Telegram/Instagram/Facebook/Twitter/WhatsApp/VK) ---
+  const isInAppBrowser = (() => {
+    const ua = navigator.userAgent || '';
+    return /(Telegram|Instagram|FBAN|FBAV|Line|Twitter|WhatsApp|VK.*App)/i.test(ua);
+  })();
+
+  // --- 1.2) Путь к хостимому .vcf (нужен для iOS in-app браузеров) ---
+  // ВАЖНО: разместите этот файл на сервере и отдавайте с заголовками:
+  // Content-Type: text/vcard; charset=utf-8   (или text/x-vcard)
+  // Content-Disposition: inline; filename="Tamara_Babylon.vcf"
+  const VCF_URL = 'https://babylon-tamara.ru/Tamara_Babylon.vcf';
+
+  // --- 1.3) Android/Web Share L2: шаринг .vcf через системное меню ---
   // Возвращает true, если удалось открыть системное меню «Поделиться» с файлом
   const shareVCardOnAndroid = async (vcardText) => {
     try {
@@ -26,10 +38,10 @@
           text: 'Добавить контакт',
           files: [file],
         });
-        return true; // меню поделиться открылось, пользователь выбрал приложение
+        return true; // меню «Поделиться» открылось
       }
     } catch {
-      // пользователь отменил или браузер выкинул ошибку — уйдём в фолбэк
+      // пользователь отменил или браузер не поддерживает — уйдём в фолбэк
     }
     return false;
   };
@@ -52,19 +64,25 @@
     return v;
   };
 
-  // --- 3) Действие по клику: iOS -> data: URI, Android -> Web Share (файл) -> фолбэк на скачивание ---
+  // --- 3) Действие по клику: iOS in-app → открыть реальный .vcf; iOS Safari → data:; Android → Web Share → скачивание ---
   const handleClick = async () => {
     const vcard = buildVCard();
 
-    if (isIOS) {
-      // iOS: открываем data: URI — система предложит добавить контакт
-      const dataUri = 'data:text/vcard;charset=utf-8,' + encodeURIComponent(vcard);
-      // Через location — меньше шансов попасть под попап-блокер
-      window.location.href = dataUri;
+    // iOS во встроенном браузере (Telegram/Instagram и др.): открыть реальный .vcf
+    if (isIOS && isInAppBrowser) {
+      // Во вьюхе появится опция «Открыть в Safari», а в Safari — системное «Добавить контакт»
+      window.open(VCF_URL, '_blank', 'noopener');
       return;
     }
 
-    // Android/другие: сперва пробуем системное меню «Поделиться» с файлом .vcf
+    // Обычный iOS (Safari): открыть data: URI — система предложит добавить контакт
+    if (isIOS) {
+      const dataUri = 'data:text/vcard;charset=utf-8,' + encodeURIComponent(vcard);
+      window.location.href = dataUri; // через location — меньше шансов на блокировку
+      return;
+    }
+
+    // Android/другие платформы: сперва пробуем системное меню «Поделиться» с файлом .vcf
     const shared = await shareVCardOnAndroid(vcard);
     if (shared) return;
 
@@ -137,7 +155,7 @@ document.addEventListener('DOMContentLoaded', function () {
           title: 'Tamara Babylon',
           url: siteUrl
         });
-      } catch (err) {
+      } catch {
         // пользователь отменил — ничего
       }
     } else {
