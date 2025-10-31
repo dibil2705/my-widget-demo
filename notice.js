@@ -12,6 +12,28 @@
     return isIPhoneIPodIPad || isIPadOS13Plus;
   })();
 
+  // --- 1.1) Android/Web Share L2: шаринг .vcf через системное меню ---
+  // Возвращает true, если удалось открыть системное меню «Поделиться» с файлом
+  const shareVCardOnAndroid = async (vcardText) => {
+    try {
+      const blob = new Blob([vcardText], { type: 'text/vcard;charset=utf-8' });
+      // Некоторые приложения на Android лучше реагируют на расширение .vcf
+      const file = new File([blob], 'Tamara_Babylon.vcf', { type: 'text/vcard' });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          title: 'Tamara Babylon',
+          text: 'Добавить контакт',
+          files: [file],
+        });
+        return true; // меню поделиться открылось, пользователь выбрал приложение
+      }
+    } catch {
+      // пользователь отменил или браузер выкинул ошибку — уйдём в фолбэк
+    }
+    return false;
+  };
+
   // --- 2) Сборка vCard (v3.0) с корректными CRLF-разделителями ---
   const buildVCard = () => {
     const v = [
@@ -25,24 +47,28 @@
       'URL:https://vk.com/bibylon',
       'URL:https://t.me/Babylon_11',
       'URL:https://babylon-tamara.ru',
-
       'END:VCARD'
     ].join('\r\n'); // vCard требует CRLF
     return v;
   };
 
-  // --- 3) Действие по клику: iOS -> data: URI, остальные -> Blob + скачивание ---
-  const handleClick = () => {
+  // --- 3) Действие по клику: iOS -> data: URI, Android -> Web Share (файл) -> фолбэк на скачивание ---
+  const handleClick = async () => {
     const vcard = buildVCard();
 
     if (isIOS) {
-      // На iOS лучше открыть data: URI — система предложит добавить контакт
+      // iOS: открываем data: URI — система предложит добавить контакт
       const dataUri = 'data:text/vcard;charset=utf-8,' + encodeURIComponent(vcard);
-      // Чаще надёжнее через location (меньше шансов попасть под попап-блокер)
+      // Через location — меньше шансов попасть под попап-блокер
       window.location.href = dataUri;
       return;
     }
 
+    // Android/другие: сперва пробуем системное меню «Поделиться» с файлом .vcf
+    const shared = await shareVCardOnAndroid(vcard);
+    if (shared) return;
+
+    // Фолбэк: обычное скачивание .vcf
     try {
       const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8' });
       const url = URL.createObjectURL(blob);
@@ -54,9 +80,8 @@
       a.remove();
       URL.revokeObjectURL(url);
     } catch (e) {
-      // Фолбэк: если что-то пошло не так, хотя бы покажем текст (редко нужно)
       console.error('vCard save error:', e);
-      alert('Не удалось скачать vCard. Попробуйте другой браузер.');
+      alert('Не удалось сохранить контакт. Попробуйте другой браузер.');
     }
   };
 
@@ -83,7 +108,7 @@
     attachDirect();
   }
 
-  // Поллер на 10 сек., если кнопка появляется позже
+  // Поллер на ~10 сек., если кнопка появляется позже
   let attempts = 0;
   const poll = setInterval(() => {
     attachDirect();
@@ -96,31 +121,32 @@
 })();
 
 
-document.addEventListener("DOMContentLoaded", function() {
-      const shareBtn = document.getElementById("shareBtn");
-      const qrContainer = document.getElementById("qrContainer");
-      const qrImage = document.getElementById("qrImage");
-      const siteUrl = "https://babylon-tamara.ru";
+// --- Блок «Поделиться сайтом»: если поддерживается navigator.share — открываем меню; иначе показываем QR ---
+document.addEventListener('DOMContentLoaded', function () {
+  const shareBtn = document.getElementById('shareBtn');
+  const qrContainer = document.getElementById('qrContainer');
+  const qrImage = document.getElementById('qrImage');
+  const siteUrl = 'https://babylon-tamara.ru';
 
-      shareBtn.addEventListener("click", async () => {
-        // Если браузер поддерживает нативное меню «Поделиться» (Safari, iPhone)
-        if (navigator.share) {
-          try {
-            await navigator.share({
-              title: "Tamara Babylon",
-              url: siteUrl
-            });
-          } catch (err) {
-            console.log("share cancelled");
-          }
-        } else {
-          // Если нет поддержки, показываем QR
-          const qrApi = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=" + encodeURIComponent(siteUrl);
-          qrImage.src = qrApi;
-          qrContainer.style.display = "block";
-        }
-      });
-    });
+  if (!shareBtn) return; // кнопки может не быть на некоторых страницах
+
+  shareBtn.addEventListener('click', async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Tamara Babylon',
+          url: siteUrl
+        });
+      } catch (err) {
+        // пользователь отменил — ничего
+      }
+    } else {
+      const qrApi = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=' + encodeURIComponent(siteUrl);
+      if (qrImage) qrImage.src = qrApi;
+      if (qrContainer) qrContainer.style.display = 'block';
+    }
+  });
+});
 
 
       // КНОПКА ПОДЕЛИТЬСЯ qr_____________________________________________________
