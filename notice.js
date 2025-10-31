@@ -252,6 +252,7 @@ document.addEventListener("DOMContentLoaded", function() {
   } catch (_) {}
 })();
 
+      // УВЕЛИЧЕНИЕ ФОТО_____________________________________________________
 
 (() => {
   'use strict';
