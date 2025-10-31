@@ -293,13 +293,29 @@ document.addEventListener("DOMContentLoaded", function() {
 
     closeBtn = document.createElement('button');
     closeBtn.setAttribute('aria-label','Закрыть');
-    closeBtn.textContent = '×';
+
+    // CHANGE: используем SVG-иконку, чтобы геометрический центр совпадал визуально
+    closeBtn.innerHTML = `
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    `;
+
     Object.assign(closeBtn.style, {
       position:'absolute', top:'-8px', right:'-8px', width:'44px', height:'44px',
-      border:'none', borderRadius:'999px', background:'rgba(255,255,255,.92)',
-      boxShadow:'0 6px 20px rgba(0,0,0,.25)', fontSize:'28px', lineHeight:'1',
-      cursor:'pointer', display:'grid', placeItems:'center'
+      padding:'0',                   // CHANGE: гарантируем отсутствие внутренних отступов
+      border:'none', borderRadius:'999px',
+      background:'rgba(255,255,255,.92)',
+      boxShadow:'0 6px 20px rgba(0,0,0,.25)',
+      // CHANGE: убираем влияние метрик шрифта на вертикальное выравнивание
+      lineHeight:'0',
+      // CHANGE: центрируем содержимое кнопки независимо от браузера
+      display:'grid', placeItems:'center',
+      cursor:'pointer', color:'#111'
     });
+    // CHANGE: кликабельность по всей кнопке, но не по самому SVG
+    closeBtn.querySelector('svg').style.pointerEvents = 'none';
+
     closeBtn.addEventListener('click', hide);
 
     img = document.createElement('img');
@@ -343,11 +359,13 @@ document.addEventListener("DOMContentLoaded", function() {
         /* крупнее кликабельные области на телефоне */
         button[aria-label="Предыдущее фото"],
         button[aria-label="Следующее фото"]{ width:56px; height:88px; font-size:30px; }
-        [aria-label="Закрыть"]{ width:48px; height:48px; font-size:30px; }
+        [aria-label="Закрыть"]{ width:48px; height:48px; }
       }
       @media (prefers-reduced-motion: reduce){
         [style*="transition"]{ transition: none !important; }
       }
+      /* CHANGE: на всякий случай — у SVG блочный рендер для точного центрирования */
+      [aria-label="Закрыть"] svg{ display:block; }
     `;
     document.head.appendChild(style);
 
@@ -581,3 +599,4 @@ document.addEventListener("DOMContentLoaded", function() {
     lastTouchEnd = now;
   }
 })();
+
