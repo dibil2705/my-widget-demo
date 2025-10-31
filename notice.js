@@ -251,3 +251,270 @@ document.addEventListener("DOMContentLoaded", function() {
     mo.observe(document.documentElement, { childList: true, subtree: true });
   } catch (_) {}
 })();
+
+
+(() => {
+  'use strict';
+
+  const IMG_SELECTOR = '.carousel .slide img';
+  const Z = 2147483647;
+
+  let overlay = null, img = null, caption = null, closeBtn = null, prevBtn = null, nextBtn = null;
+  let keydownHandler = null, lastActive = null;
+  let prevDocOverflow = '', prevBodyOverflow = '', prevBodyPadRight = '';
+  let currentList = [], currentIndex = 0;
+  let fitMode = 'contain'; // 'contain' | 'actual'
+
+  function ensureOverlay(){
+    if (overlay) return overlay;
+
+    overlay = document.createElement('div');
+    Object.assign(overlay.style, {
+      position: 'fixed', inset: '0', background: 'rgba(0,0,0,.75)',
+      display: 'grid', placeItems: 'center', padding: '24px',
+      zIndex: String(Z), cursor: 'zoom-in'
+    });
+    overlay.addEventListener('click', e => { if (e.target === overlay) hide(); });
+
+    const frame = document.createElement('div');
+    Object.assign(frame.style, { position:'relative', maxWidth:'min(92vw, 1600px)', maxHeight:'92vh' });
+
+    closeBtn = document.createElement('button');
+    closeBtn.setAttribute('aria-label','Закрыть');
+    closeBtn.textContent = '×';
+    Object.assign(closeBtn.style, {
+      position:'absolute', top:'-8px', right:'-8px', width:'40px', height:'40px',
+      border:'none', borderRadius:'999px', background:'rgba(255,255,255,.9)',
+      boxShadow:'0 6px 20px rgba(0,0,0,.25)', fontSize:'26px', lineHeight:'1',
+      cursor:'pointer', display:'grid', placeItems:'center'
+    });
+    closeBtn.addEventListener('click', hide);
+
+    img = document.createElement('img');
+    img.alt = '';
+    Object.assign(img.style, {
+      maxWidth:'92vw', maxHeight:'82vh', borderRadius:'18px',
+      boxShadow:'0 18px 44px rgba(0,0,0,.45)', display:'block',
+      transition:'transform .2s ease'
+    });
+    img.addEventListener('dblclick', toggleFit);
+
+    caption = document.createElement('div');
+    Object.assign(caption.style, {
+      marginTop:'12px', textAlign:'center', color:'#f3f4f6',
+      font:'600 14px/1.3 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif',
+      textShadow:'0 1px 0 rgba(0,0,0,.35)', wordBreak:'break-word'
+    });
+
+    // стрелки
+    prevBtn = makeArrow('prev');
+    nextBtn = makeArrow('next');
+
+    frame.appendChild(img);
+    frame.appendChild(closeBtn);
+    overlay.appendChild(frame);
+    overlay.appendChild(prevBtn);
+    overlay.appendChild(nextBtn);
+    overlay.appendChild(caption);
+
+    // a11y
+    frame.setAttribute('role','dialog');
+    frame.setAttribute('aria-modal','true');
+    frame.setAttribute('aria-label','Просмотр изображения');
+
+    return overlay;
+  }
+
+  function makeArrow(dir){
+    const b = document.createElement('button');
+    const isPrev = dir === 'prev';
+    b.setAttribute('aria-label', isPrev ? 'Предыдущее фото' : 'Следующее фото');
+    b.innerHTML = isPrev ? '&#10094;' : '&#10095;'; // ‹ ›
+    Object.assign(b.style, {
+      position:'fixed', top:'50%', transform:'translateY(-50%)',
+      [isPrev ? 'left' : 'right']:'10px',
+      width:'48px', height:'72px', border:'none', borderRadius:'16px',
+      background:'rgba(255,255,255,.9)', color:'#111', fontSize:'28px',
+      display:'grid', placeItems:'center', cursor:'pointer',
+      boxShadow:'0 10px 28px rgba(0,0,0,.25)'
+    });
+    b.addEventListener('click', () => navigate(isPrev ? -1 : 1));
+    return b;
+  }
+
+  function show(list, index, alt){
+    ensureOverlay();
+    currentList = list;
+    currentIndex = index;
+    fitMode = 'contain';
+    updateImage(alt);
+
+    // блокируем фон + компенсируем скроллбар
+    lastActive = document.activeElement;
+    prevDocOverflow = document.documentElement.style.overflow;
+    prevBodyOverflow = document.body.style.overflow;
+    prevBodyPadRight = document.body.style.paddingRight;
+    const sw = window.innerWidth - document.documentElement.clientWidth;
+    if (sw > 0) document.body.style.paddingRight = sw + 'px';
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+
+    overlay.style.opacity = '0';
+    overlay.style.transition = 'opacity .18s ease';
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => overlay.style.opacity = '1');
+
+    closeBtn.focus({ preventScroll:true });
+
+    keydownHandler = (e) => {
+      if (e.key === 'Escape') { e.preventDefault(); hide(); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); navigate(-1); }
+      else if (e.key === 'ArrowRight') { e.preventDefault(); navigate(1); }
+      else if (e.key === 'Enter' || e.key === ' ') { if (document.activeElement === img) toggleFit(); }
+      if (e.key === 'Tab') trapFocus(e);
+    };
+    document.addEventListener('keydown', keydownHandler, true);
+
+    // жесты пролистывания
+    addSwipe();
+  }
+
+  function hide(){
+    if (!overlay || !overlay.parentNode) return;
+    overlay.style.opacity = '0';
+    setTimeout(() => {
+      overlay.remove();
+      document.removeEventListener('keydown', keydownHandler, true);
+      document.documentElement.style.overflow = prevDocOverflow;
+      document.body.style.overflow = prevBodyOverflow;
+      document.body.style.paddingRight = prevBodyPadRight;
+      if (lastActive && lastActive.focus) lastActive.focus({ preventScroll:true });
+    }, 180);
+  }
+
+  function updateImage(altFallback){
+    const src = currentList[currentIndex];
+    img.src = src;
+    img.style.transform = 'scale(1)';
+    img.style.objectFit = 'contain';
+    overlay.style.cursor = 'zoom-in';
+    caption.textContent = altFallback || img.alt || '';
+    // доступность стрелок
+    const hasPrev = currentIndex > 0, hasNext = currentIndex < currentList.length - 1;
+    prevBtn.style.display = hasPrev ? '' : 'none';
+    nextBtn.style.display = hasNext ? '' : 'none';
+  }
+
+  function navigate(step){
+    const next = currentIndex + step;
+    if (next < 0 || next >= currentList.length) return;
+    currentIndex = next;
+    updateImage();
+  }
+
+  function toggleFit(){
+    if (fitMode === 'contain') {
+      fitMode = 'actual';
+      img.style.objectFit = 'none';
+      img.style.maxWidth = 'none';
+      img.style.maxHeight = 'none';
+      img.style.transform = 'scale(1)';
+      overlay.style.cursor = 'zoom-out';
+      // центрируем по вьюпорту
+      const rect = img.getBoundingClientRect();
+      const dx = (window.innerWidth - rect.width) / 2 - rect.left;
+      const dy = (window.innerHeight - rect.height) / 2 - rect.top;
+      window.scrollBy({ left: 0, top: 0, behavior: 'instant' });
+      // Панорамирование мышью
+      enablePan();
+    } else {
+      fitMode = 'contain';
+      img.style.objectFit = 'contain';
+      img.style.maxWidth = '92vw';
+      img.style.maxHeight = '82vh';
+      img.style.transform = 'scale(1)';
+      overlay.style.cursor = 'zoom-in';
+      disablePan();
+    }
+  }
+
+  // ловушка фокуса внутри оверлея
+  function trapFocus(e){
+    const focusable = overlay.querySelectorAll('button, [href], [tabindex]:not([tabindex="-1"])');
+    if (!focusable.length) return;
+    const first = focusable[0], last = focusable[focusable.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
+
+  // делегирование кликов из карусели
+  document.addEventListener('click', (e) => {
+    const pic = e.target && e.target.closest ? e.target.closest(IMG_SELECTOR) : null;
+    if (!pic) return;
+
+    // собираем список изображений внутри текущей карусели (тот же блок .track)
+    const track = pic.closest('.track');
+    const imgs = Array.from(track.querySelectorAll('img'));
+    const list = imgs.map(n => n.currentSrc || n.src);
+    const index = imgs.indexOf(pic);
+    const alt = pic.getAttribute('alt') || '';
+
+    show(list, index, alt);
+  }, true);
+
+  // --- лёгкий свайп (Pointer Events) ---
+  let startX = 0, startY = 0, isPointer = false;
+  function addSwipe(){
+    overlay.addEventListener('pointerdown', onDown);
+    overlay.addEventListener('pointerup', onUp);
+    overlay.addEventListener('pointercancel', onUp);
+  }
+  function onDown(e){
+    if (e.target !== img) return; // свайпим по фото
+    isPointer = true; startX = e.clientX; startY = e.clientY;
+  }
+  function onUp(e){
+    if (!isPointer) return; isPointer = false;
+    const dx = e.clientX - startX, dy = e.clientY - startY;
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)){
+      navigate(dx < 0 ? 1 : -1);
+    }
+  }
+
+  // --- панорамирование при режиме 1:1 ---
+  let isPanning = false, panX = 0, panY = 0, lastMX = 0, lastMY = 0;
+  function enablePan(){
+    img.style.cursor = 'grab';
+    img.addEventListener('pointerdown', panStart);
+    img.addEventListener('pointerup', panEnd);
+    img.addEventListener('pointerleave', panEnd);
+    img.addEventListener('pointermove', panMove);
+  }
+  function disablePan(){
+    img.style.cursor = '';
+    img.removeEventListener('pointerdown', panStart);
+    img.removeEventListener('pointerup', panEnd);
+    img.removeEventListener('pointerleave', panEnd);
+    img.removeEventListener('pointermove', panMove);
+    panX = panY = 0; img.style.transform = 'translate(0,0)';
+  }
+  function panStart(e){ isPanning = true; img.setPointerCapture(e.pointerId); lastMX = e.clientX; lastMY = e.clientY; img.style.cursor='grabbing'; }
+  function panEnd(e){ isPanning = false; try{ img.releasePointerCapture(e.pointerId);}catch(_){ } img.style.cursor='grab'; }
+  function panMove(e){
+    if (!isPanning) return;
+    const dx = e.clientX - lastMX; const dy = e.clientY - lastMY;
+    lastMX = e.clientX; lastMY = e.clientY;
+    panX += dx; panY += dy;
+    img.style.transform = `translate(${panX}px, ${panY}px)`;
+  }
+
+  // небольшая косметика курсоров для миниатюр
+  const style = document.createElement('style');
+  style.textContent = `
+    .carousel .slide img{ cursor: zoom-in; }
+    @media (prefers-reduced-motion: reduce){
+      [style*="transition"]{ transition: none !important; }
+    }
+  `;
+  document.head.appendChild(style);
+})();
