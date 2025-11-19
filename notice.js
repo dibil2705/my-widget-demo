@@ -824,7 +824,7 @@ document.addEventListener('DOMContentLoaded', function () {
   var footer = document.querySelector('.footer-animated');
   var bioBtn = document.createElement('button');
   bioBtn.id = 'bioBtn';
-  bioBtn.textContent = 'Description';
+  bioBtn.textContent = 'About me';
   bioBtn.setAttribute('aria-label', 'Открыть описание');
 
   if (footer) {
