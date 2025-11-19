@@ -605,54 +605,39 @@ document.addEventListener("DOMContentLoaded", function() {
 (() => {
   'use strict';
 
-  const SITE_URL = 'https://babylon-tamara.ru';
   const btn = document.getElementById('bioBtn');
-  const panel = document.getElementById('profilePanel');
-  const closeBtn = document.getElementById('profilePanelClose');
-  const qrImg = document.getElementById('profilePanelQr');
+  const panel = document.getElementById('bioPanel');
+  const closeBtn = document.getElementById('bioClose');
 
   if (!btn || !panel) return;
 
-  function loadQROnce() {
-    if (!qrImg || qrImg.dataset.loaded) return;
-    const size = 220;
-    qrImg.src =
-      'https://api.qrserver.com/v1/create-qr-code/?size=' +
-      size + 'x' + size +
-      '&data=' + encodeURIComponent(SITE_URL);
-    qrImg.dataset.loaded = '1';
-  }
-
-  function openPanel() {
-    panel.classList.add('profile-panel--visible');
+  const openPanel = () => {
+    panel.classList.add('bio-open');
     panel.setAttribute('aria-hidden', 'false');
-    loadQROnce();
-  }
+  };
 
-  function closePanel() {
-    panel.classList.remove('profile-panel--visible');
+  const closePanel = () => {
+    panel.classList.remove('bio-open');
     panel.setAttribute('aria-hidden', 'true');
-  }
+  };
 
   btn.addEventListener('click', (e) => {
     e.preventDefault();
-    if (panel.classList.contains('profile-panel--visible')) {
+    if (panel.classList.contains('bio-open')) {
       closePanel();
     } else {
       openPanel();
     }
   });
 
-  if (closeBtn) {
-    closeBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      closePanel();
-    });
-  }
+  closeBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    closePanel();
+  });
 
   // Закрытие по Esc
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && panel.classList.contains('profile-panel--visible')) {
+    if (e.key === 'Escape' && panel.classList.contains('bio-open')) {
       closePanel();
     }
   });
