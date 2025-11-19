@@ -606,7 +606,7 @@ document.addEventListener("DOMContentLoaded", function() {
 document.addEventListener('DOMContentLoaded', function () {
   // 1) Вставляем CSS (кнопка + панель сверху)
   var css = `
-  /* Кнопка "Описание" в футере */
+  /* Кнопка "Description" в футере */
   #bioBtn {
     position: absolute;
     left: 50%;
