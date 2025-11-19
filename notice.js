@@ -619,7 +619,7 @@ document.addEventListener('DOMContentLoaded', function () {
     font-weight: 600;
     color: #fff;
     cursor: pointer;
-    background: linear-gradient(to right, #8a2be2 0%, #ff4b5c 100%);
+    background: linear-gradient(to right, #3A0F5C 0%, #5A2DAF 100%);
     box-shadow: 0 0 18px rgba(0,0,0,0.45);
     transition: transform .2s ease, opacity .2s ease;
     z-index: 20;
@@ -631,27 +631,33 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   /* Верхняя панель с описанием (по умолчанию скрыта) */
-  #bioPanel {
+    #bioPanel {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-
+  
     transform: translateY(-110%);
     opacity: 0;
-
+  
     z-index: 9999;
     background: radial-gradient(circle at top left, #2a2a40 0%, #050509 55%, #000 100%);
     color: #f5f5f5;
     padding: 18px 16px 20px;
-
+  
     border-bottom-left-radius: 24px;
     border-bottom-right-radius: 24px;
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.75);
-
+  
     font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     transition: transform 0.32s ease, opacity 0.32s ease;
+  
+    /* ВАЖНО: чтобы на мобилке можно было пролистывать текст */
+    max-height: 90vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
+
 
   /* Панель показана */
   #bioPanel.bio-open {
