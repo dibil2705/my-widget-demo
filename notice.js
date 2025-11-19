@@ -602,6 +602,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
  //  ОПИСАНИЕ_____________________________________________________
 
+//  ОПИСАНИЕ_____________________________________________________
+
 // bio panel overlay for #bioBtn
 (() => {
   'use strict';
@@ -701,4 +703,5 @@ document.addEventListener("DOMContentLoaded", function() {
     mo.observe(document.documentElement, { childList: true, subtree: true });
   } catch (_) {}
 })();
+
 
