@@ -602,7 +602,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
  //  ОПИСАНИЕ_____________________________________________________
 
-// bio panel toggle — в том же стиле, что и твои другие скрипты
+// bio panel overlay for #bioBtn
 (() => {
   'use strict';
 
@@ -610,23 +610,27 @@ document.addEventListener("DOMContentLoaded", function() {
   const PANEL_SELECTOR = '#bioPanel';
   const CLOSE_SELECTOR = '#bioClose';
 
+  function getPanel() {
+    return document.querySelector(PANEL_SELECTOR);
+  }
+
   function openPanel() {
-    const panel = document.querySelector(PANEL_SELECTOR);
+    const panel = getPanel();
     if (!panel) return;
-    panel.classList.add('bio-open');
+    panel.classList.add('bio-open');        // класс, который показывает панель
     panel.setAttribute('aria-hidden', 'false');
   }
 
   function closePanel() {
-    const panel = document.querySelector(PANEL_SELECTOR);
+    const panel = getPanel();
     if (!panel) return;
     panel.classList.remove('bio-open');
     panel.setAttribute('aria-hidden', 'true');
   }
 
   function handleToggleClick(e) {
-    e && e.preventDefault && e.preventDefault();
-    const panel = document.querySelector(PANEL_SELECTOR);
+    if (e && e.preventDefault) e.preventDefault();
+    const panel = getPanel();
     if (!panel) return;
     if (panel.classList.contains('bio-open')) {
       closePanel();
@@ -636,12 +640,12 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   function handleCloseClick(e) {
-    e && e.preventDefault && e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
     closePanel();
   }
 
-  // навешиваем обработчики на реальные элементы
-  function attachDirect() {
+  // Надёжное навешивание обработчиков (как в share-qr)
+  function bind() {
     const btn   = document.querySelector(BTN_SELECTOR);
     const close = document.querySelector(CLOSE_SELECTOR);
 
@@ -649,24 +653,23 @@ document.addEventListener("DOMContentLoaded", function() {
       btn.addEventListener('click', handleToggleClick);
       btn.__bioBound = true;
     }
+
     if (close && !close.__bioBound) {
       close.addEventListener('click', handleCloseClick);
       close.__bioBound = true;
     }
   }
 
-  // прямой вызов
-  attachDirect();
-
-  // если DOM грузится позже
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', attachDirect, { once: true });
+    document.addEventListener('DOMContentLoaded', bind, { once: true });
+  } else {
+    bind();
   }
 
-  // делегирование на случай, если платформа пересоздаёт элементы
-  document.addEventListener('click', function (e) {
-    const tBtn   = e.target.closest && e.target.closest(BTN_SELECTOR);
-    const tClose = e.target.closest && e.target.closest(CLOSE_SELECTOR);
+  // Делегирование и подстраховки на случай перерисовок
+  document.addEventListener('click', (e) => {
+    const tBtn   = e.target && e.target.closest ? e.target.closest(BTN_SELECTOR)   : null;
+    const tClose = e.target && e.target.closest ? e.target.closest(CLOSE_SELECTOR) : null;
 
     if (tBtn) {
       handleToggleClick(e);
@@ -675,16 +678,26 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   }, true);
 
-  // поллер на случай ленивой подгрузки
+  // Закрытие по Esc
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      const panel = getPanel();
+      if (panel && panel.classList.contains('bio-open')) {
+        closePanel();
+      }
+    }
+  });
+
+  // Поллер на случай ленивой подгрузки DOM
   let tries = 0;
   const iv = setInterval(() => {
-    attachDirect();
-    if (++tries >= 20) clearInterval(iv);
+    bind();
+    if (++tries > 20) clearInterval(iv);
   }, 500);
 
-  // подстраховка при мутациях DOM
+  // Подстраховка при мутациях DOM (конструктор любит пересоздавать узлы)
   try {
-    const mo = new MutationObserver(attachDirect);
+    const mo = new MutationObserver(bind);
     mo.observe(document.documentElement, { childList: true, subtree: true });
   } catch (_) {}
 })();
