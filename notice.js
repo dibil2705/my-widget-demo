@@ -602,106 +602,11 @@ document.addEventListener("DOMContentLoaded", function() {
 
  //  ОПИСАНИЕ_____________________________________________________
 
-//  ОПИСАНИЕ_____________________________________________________
+document.getElementById("bioBtn").onclick = () => {
+  document.getElementById("bioPanel").classList.add("bio-open");
+};
 
-// bio panel overlay for #bioBtn
-(() => {
-  'use strict';
-
-  const BTN_SELECTOR   = '#bioBtn';
-  const PANEL_SELECTOR = '#bioPanel';
-  const CLOSE_SELECTOR = '#bioClose';
-
-  function getPanel() {
-    return document.querySelector(PANEL_SELECTOR);
-  }
-
-  function openPanel() {
-    const panel = getPanel();
-    if (!panel) return;
-    panel.classList.add('bio-open');        // класс, который показывает панель
-    panel.setAttribute('aria-hidden', 'false');
-  }
-
-  function closePanel() {
-    const panel = getPanel();
-    if (!panel) return;
-    panel.classList.remove('bio-open');
-    panel.setAttribute('aria-hidden', 'true');
-  }
-
-  function handleToggleClick(e) {
-    if (e && e.preventDefault) e.preventDefault();
-    const panel = getPanel();
-    if (!panel) return;
-    if (panel.classList.contains('bio-open')) {
-      closePanel();
-    } else {
-      openPanel();
-    }
-  }
-
-  function handleCloseClick(e) {
-    if (e && e.preventDefault) e.preventDefault();
-    closePanel();
-  }
-
-  // Надёжное навешивание обработчиков (как в share-qr)
-  function bind() {
-    const btn   = document.querySelector(BTN_SELECTOR);
-    const close = document.querySelector(CLOSE_SELECTOR);
-
-    if (btn && !btn.__bioBound) {
-      btn.addEventListener('click', handleToggleClick);
-      btn.__bioBound = true;
-    }
-
-    if (close && !close.__bioBound) {
-      close.addEventListener('click', handleCloseClick);
-      close.__bioBound = true;
-    }
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', bind, { once: true });
-  } else {
-    bind();
-  }
-
-  // Делегирование и подстраховки на случай перерисовок
-  document.addEventListener('click', (e) => {
-    const tBtn   = e.target && e.target.closest ? e.target.closest(BTN_SELECTOR)   : null;
-    const tClose = e.target && e.target.closest ? e.target.closest(CLOSE_SELECTOR) : null;
-
-    if (tBtn) {
-      handleToggleClick(e);
-    } else if (tClose) {
-      handleCloseClick(e);
-    }
-  }, true);
-
-  // Закрытие по Esc
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      const panel = getPanel();
-      if (panel && panel.classList.contains('bio-open')) {
-        closePanel();
-      }
-    }
-  });
-
-  // Поллер на случай ленивой подгрузки DOM
-  let tries = 0;
-  const iv = setInterval(() => {
-    bind();
-    if (++tries > 20) clearInterval(iv);
-  }, 500);
-
-  // Подстраховка при мутациях DOM (конструктор любит пересоздавать узлы)
-  try {
-    const mo = new MutationObserver(bind);
-    mo.observe(document.documentElement, { childList: true, subtree: true });
-  } catch (_) {}
-})();
-
+document.getElementById("bioClose").onclick = () => {
+  document.getElementById("bioPanel").classList.remove("bio-open");
+};
 
