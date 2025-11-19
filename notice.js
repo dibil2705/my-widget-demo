@@ -602,11 +602,245 @@ document.addEventListener("DOMContentLoaded", function() {
 
  //  ОПИСАНИЕ_____________________________________________________
 
-document.getElementById("bioBtn").onclick = () => {
-  document.getElementById("bioPanel").classList.add("bio-open");
-};
 
-document.getElementById("bioClose").onclick = () => {
-  document.getElementById("bioPanel").classList.remove("bio-open");
-};
+document.addEventListener('DOMContentLoaded', function () {
+  // 1) Вставляем CSS (кнопка + панель сверху)
+  var css = `
+  /* Кнопка "Описание" в футере */
+  #bioBtn {
+    position: absolute;
+    left: 50%;
+    bottom: 18px;
+    transform: translateX(-50%);
+    padding: 10px 22px;
+    border: none;
+    border-radius: 28px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #fff;
+    cursor: pointer;
+    background: linear-gradient(to right, #8a2be2 0%, #ff4b5c 100%);
+    box-shadow: 0 0 18px rgba(0,0,0,0.45);
+    transition: transform .2s ease, opacity .2s ease;
+    z-index: 20;
+  }
 
+  #bioBtn:hover {
+    transform: translateX(-50%) scale(1.04);
+    opacity: 0.92;
+  }
+
+  /* Верхняя панель с описанием (по умолчанию скрыта) */
+  #bioPanel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+
+    transform: translateY(-110%);
+    opacity: 0;
+
+    z-index: 9999;
+    background: radial-gradient(circle at top left, #2a2a40 0%, #050509 55%, #000 100%);
+    color: #f5f5f5;
+    padding: 18px 16px 20px;
+
+    border-bottom-left-radius: 24px;
+    border-bottom-right-radius: 24px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.75);
+
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    transition: transform 0.32s ease, opacity 0.32s ease;
+  }
+
+  /* Панель показана */
+  #bioPanel.bio-open {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  #bioPanelInner {
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  #bioPanel h2 {
+    margin: 0 0 4px;
+    font-size: 1.7rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  #bioPanel h3 {
+    margin: 0 0 10px;
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: #e0e0e0;
+  }
+
+  #bioPanel p {
+    margin: 0 0 8px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: #dddddd;
+  }
+
+  #bioPanel strong {
+    color: #ffffff;
+    font-weight: 600;
+  }
+
+  .bio-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 10px 24px;
+    margin-top: 6px;
+  }
+
+  .bio-block-title {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+    color: #b3b3ff;
+  }
+
+  #bioPanel ul {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 0.92rem;
+    color: #dcdcdc;
+  }
+
+  #bioPanel li + li {
+    margin-top: 2px;
+  }
+
+  .bio-text {
+    margin-top: 10px;
+    font-size: 0.93rem;
+    color: #d6d6d6;
+  }
+
+  /* Крестик закрытия */
+  #bioClose {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    background: transparent;
+    border: none;
+    font-size: 26px;
+    line-height: 1;
+    cursor: pointer;
+    color: #aaaaaa;
+    padding: 2px 6px;
+    transition: transform 0.16s ease, color 0.16s ease;
+  }
+
+  #bioClose:hover {
+    transform: scale(1.08);
+    color: #ffffff;
+  }
+
+  @media (max-width: 640px) {
+    #bioPanel {
+      padding-top: 18px;
+      padding-bottom: 16px;
+    }
+
+    #bioPanel h2,
+    #bioPanel h3 {
+      text-align: center;
+    }
+  }
+  `;
+
+  var styleEl = document.createElement('style');
+  styleEl.type = 'text/css';
+  styleEl.appendChild(document.createTextNode(css));
+  document.head.appendChild(styleEl);
+
+  // 2) Создаём саму панель с описанием и вставляем в body
+  var panelHtml = `
+    <div id="bioPanel">
+      <button id="bioClose" aria-label="Закрыть описание">&times;</button>
+      <div id="bioPanelInner">
+        <h2>Tamara Babylon</h2>
+        <h3>International Actress and Model (theater artist)</h3>
+
+        <div class="bio-grid">
+          <div>
+            <div class="bio-block-title">Profile</div>
+            <p><strong>Screen age:</strong> 25–35 years</p>
+            <p><strong>Height:</strong> 5'6</p>
+            <p><strong>Measurements:</strong> 92/70/92</p>
+            <p><strong>Hair:</strong> brown</p>
+            <p><strong>Eyes:</strong> light brown</p>
+            <p><strong>Clothing size:</strong> 42–44 (S–M)</p>
+            <p><strong>Shoe size:</strong> 37</p>
+            <p><strong>Based in:</strong> Mumbai, Maharashtra</p>
+          </div>
+
+          <div>
+            <div class="bio-block-title">Skills</div>
+            <ul>
+              <li>Car driver</li>
+              <li>Yoga teacher</li>
+              <li>Swimming</li>
+              <li>Horseback riding</li>
+              <li>Handpan player</li>
+              <li>Gym</li>
+            </ul>
+          </div>
+
+          <div>
+            <div class="bio-block-title">Languages</div>
+            <ul>
+              <li>English</li>
+              <li>Russian</li>
+              <li>Georgian</li>
+              <li>Ossetian</li>
+              <li>Hindi (can learn lines)</li>
+            </ul>
+          </div>
+        </div>
+
+        <p class="bio-text">
+          Tamara Babylon is an international actress and model who is rapidly conquering the screen. Over the course of several years, she has distinguished herself in Russia, landing leading roles in films, and is also conquering the Indian film industry. Tamara has appeared in popular TV series, feature films, and international advertising projects, demonstrating her versatility and unique talent that transcends cultural boundaries.
+        </p>
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML('beforeend', panelHtml);
+
+  // 3) Ищем твой футер и создаём кнопку "Описание"
+  var footer = document.querySelector('.footer-animated');
+  var bioBtn = document.createElement('button');
+  bioBtn.id = 'bioBtn';
+  bioBtn.textContent = 'Описание';
+  bioBtn.setAttribute('aria-label', 'Открыть описание');
+
+  if (footer) {
+    footer.appendChild(bioBtn);
+  } else {
+    // fallback, если футер вдруг не найден – просто фиксируем кнопку внизу
+    bioBtn.style.position = 'fixed';
+    bioBtn.style.left = '50%';
+    bioBtn.style.bottom = '18px';
+    bioBtn.style.transform = 'translateX(-50%)';
+    document.body.appendChild(bioBtn);
+  }
+
+  // 4) Навешиваем логику открытия/закрытия
+  var bioPanel = document.getElementById('bioPanel');
+  var bioClose = document.getElementById('bioClose');
+
+  bioBtn.addEventListener('click', function () {
+    bioPanel.classList.add('bio-open');
+  });
+
+  bioClose.addEventListener('click', function () {
+    bioPanel.classList.remove('bio-open');
+  });
+});
