@@ -602,43 +602,90 @@ document.addEventListener("DOMContentLoaded", function() {
 
  //  ОПИСАНИЕ_____________________________________________________
 
+// bio panel toggle — в том же стиле, что и твои другие скрипты
 (() => {
   'use strict';
 
-  const btn = document.getElementById('bioBtn');
-  const panel = document.getElementById('bioPanel');
-  const closeBtn = document.getElementById('bioClose');
+  const BTN_SELECTOR   = '#bioBtn';
+  const PANEL_SELECTOR = '#bioPanel';
+  const CLOSE_SELECTOR = '#bioClose';
 
-  if (!btn || !panel) return;
-
-  const openPanel = () => {
+  function openPanel() {
+    const panel = document.querySelector(PANEL_SELECTOR);
+    if (!panel) return;
     panel.classList.add('bio-open');
     panel.setAttribute('aria-hidden', 'false');
-  };
+  }
 
-  const closePanel = () => {
+  function closePanel() {
+    const panel = document.querySelector(PANEL_SELECTOR);
+    if (!panel) return;
     panel.classList.remove('bio-open');
     panel.setAttribute('aria-hidden', 'true');
-  };
+  }
 
-  btn.addEventListener('click', (e) => {
-    e.preventDefault();
+  function handleToggleClick(e) {
+    e && e.preventDefault && e.preventDefault();
+    const panel = document.querySelector(PANEL_SELECTOR);
+    if (!panel) return;
     if (panel.classList.contains('bio-open')) {
       closePanel();
     } else {
       openPanel();
     }
-  });
+  }
 
-  closeBtn.addEventListener('click', (e) => {
-    e.preventDefault();
+  function handleCloseClick(e) {
+    e && e.preventDefault && e.preventDefault();
     closePanel();
-  });
+  }
 
-  // Закрытие по Esc
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && panel.classList.contains('bio-open')) {
-      closePanel();
+  // навешиваем обработчики на реальные элементы
+  function attachDirect() {
+    const btn   = document.querySelector(BTN_SELECTOR);
+    const close = document.querySelector(CLOSE_SELECTOR);
+
+    if (btn && !btn.__bioBound) {
+      btn.addEventListener('click', handleToggleClick);
+      btn.__bioBound = true;
     }
-  });
+    if (close && !close.__bioBound) {
+      close.addEventListener('click', handleCloseClick);
+      close.__bioBound = true;
+    }
+  }
+
+  // прямой вызов
+  attachDirect();
+
+  // если DOM грузится позже
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', attachDirect, { once: true });
+  }
+
+  // делегирование на случай, если платформа пересоздаёт элементы
+  document.addEventListener('click', function (e) {
+    const tBtn   = e.target.closest && e.target.closest(BTN_SELECTOR);
+    const tClose = e.target.closest && e.target.closest(CLOSE_SELECTOR);
+
+    if (tBtn) {
+      handleToggleClick(e);
+    } else if (tClose) {
+      handleCloseClick(e);
+    }
+  }, true);
+
+  // поллер на случай ленивой подгрузки
+  let tries = 0;
+  const iv = setInterval(() => {
+    attachDirect();
+    if (++tries >= 20) clearInterval(iv);
+  }, 500);
+
+  // подстраховка при мутациях DOM
+  try {
+    const mo = new MutationObserver(attachDirect);
+    mo.observe(document.documentElement, { childList: true, subtree: true });
+  } catch (_) {}
 })();
+
