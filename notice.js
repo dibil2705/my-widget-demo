@@ -1,5 +1,5 @@
 // notice.js — генерация vCard по клику на #saveContactBtn
-(() => {
+/*(() => {
   'use strict';
 
   const BTN_SELECTOR = '#saveContactBtn';
@@ -122,6 +122,83 @@ document.addEventListener("DOMContentLoaded", function() {
       });
     });
 
+*/
+
+
+      // Тест ссылка на vcf_____________________________________________________
+
+
+// notice.js — переход по клику на #saveContactBtn к готовому vCard-файлу
+(() => {
+  'use strict';
+
+  const BTN_SELECTOR = '#saveContactBtn';
+  const VCF_URL = 'https://dibil2705.github.io/my-widget-demo/Tamara_Babylon.vcf';
+
+  const handleClick = () => {
+    window.location.href = VCF_URL;
+  };
+
+  const attachDirect = () => {
+    const btn = document.querySelector(BTN_SELECTOR);
+    if (btn && !btn.__vcardBound) {
+      btn.addEventListener('click', handleClick);
+      btn.__vcardBound = true;
+    }
+  };
+
+  const delegated = (e) => {
+    const t = e.target && e.target.closest ? e.target.closest(BTN_SELECTOR) : null;
+    if (t) handleClick();
+  };
+
+  try {
+    document.addEventListener('click', delegated, { capture: true, passive: true });
+  } catch {
+    document.addEventListener('click', delegated, true);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', attachDirect, { once: true });
+  } else {
+    attachDirect();
+  }
+
+  let attempts = 0;
+  const poll = setInterval(() => {
+    attachDirect();
+    if (++attempts >= 20) clearInterval(poll);
+  }, 500);
+
+  const mo = new MutationObserver(() => attachDirect());
+  mo.observe(document.documentElement, { childList: true, subtree: true });
+})();
+
+document.addEventListener('DOMContentLoaded', function () {
+  const shareBtn = document.getElementById('shareBtn');
+  const qrContainer = document.getElementById('qrContainer');
+  const qrImage = document.getElementById('qrImage');
+  const siteUrl = 'https://babylon-tamara.ru';
+
+  shareBtn.addEventListener('click', async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Tamara Babylon',
+          url: siteUrl
+        });
+      } catch (err) {
+        console.log('share cancelled');
+      }
+    } else {
+      const qrApi =
+        'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=' +
+        encodeURIComponent(siteUrl);
+      qrImage.src = qrApi;
+      qrContainer.style.display = 'block';
+    }
+  });
+});
 
 
       // КНОПКА ПОДЕЛИТЬСЯ qr_____________________________________________________
