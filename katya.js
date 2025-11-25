@@ -80,7 +80,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 // share-qr overlay for #shareBtn (works with strict CSP if external JS is allowed)
-<script>
 (() => {
   'use strict';
 
@@ -220,7 +219,6 @@ document.addEventListener('DOMContentLoaded', function () {
     onShareClick();
   }, { passive: false });
 })();
-</script>
 
   /*    // УВЕЛИЧЕНИЕ ФОТО_____________________________________________________
 
