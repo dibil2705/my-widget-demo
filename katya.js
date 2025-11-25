@@ -80,57 +80,102 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 // share-qr overlay for #shareBtn (works with strict CSP if external JS is allowed)
+<script>
 (() => {
   'use strict';
 
-  const BTN_SELECTOR = '#shareBtn';
   const SITE_URL = 'https://babylon-tamara.ru';
-  const QR_SIZE = 240; // px
-  const Z = 2147483647;
+  const QR_SIZE = 240;
+  const BTN_SELECTOR = '#shareBtn';
 
-  // Создание оверлея один раз
-  let overlay = null, img = null, box = null, closeBtn = null;
+  let overlay, img;
+
   function ensureOverlay() {
-    if (overlay) return overlay;
+    if (overlay) return;
 
     overlay = document.createElement('div');
     Object.assign(overlay.style, {
-      position: 'fixed', inset: '0', background: 'rgba(0,0,0,.6)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      zIndex: String(Z), padding: '20px'
+      position: 'fixed',
+      inset: '0',
+      background: 'rgba(0,0,0,.6)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: '2147483647',
+      padding: '20px',
+      opacity: '0',
+      transition: 'opacity .2s ease'
     });
 
-    // клики по фону закрывают
-    overlay.addEventListener('click', (e) => { if (e.target === overlay) hideQR(); });
-
-    box = document.createElement('div');
+    const box = document.createElement('div');
     Object.assign(box.style, {
-      background: '#fff', borderRadius: '14px', padding: '16px 16px 22px',
-      boxShadow: '0 10px 30px rgba(0,0,0,.35)', textAlign: 'center',
-      maxWidth: (QR_SIZE + 32) + 'px', width: '100%', position: 'relative'
+      background: '#fff',
+      borderRadius: '14px',
+      padding: '16px 16px 22px',
+      boxShadow: '0 10px 30px rgba(0,0,0,.35)',
+      textAlign: 'center',
+      maxWidth: (QR_SIZE + 32) + 'px',
+      width: '100%',
+      position: 'relative'
     });
 
-    closeBtn = document.createElement('button');
+    const closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
     closeBtn.setAttribute('aria-label', 'Закрыть');
     closeBtn.textContent = '×';
     Object.assign(closeBtn.style, {
-      position: 'absolute', top: '6px', right: '10px',
-      background: 'transparent', border: 'none', fontSize: '26px',
-      lineHeight: '1', cursor: 'pointer', color: '#555'
+      position: 'absolute',
+      top: '6px',
+      right: '10px',
+      background: 'transparent',
+      border: 'none',
+      fontSize: '26px',
+      lineHeight: '1',
+      cursor: 'pointer',
+      color: '#555'
     });
-    closeBtn.addEventListener('click', hideQR);
 
     const title = document.createElement('div');
     title.textContent = 'Откройте камерой QR';
-    Object.assign(title.style, { margin: '6px 0 12px', fontFamily: 'system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif', fontSize: '16px', color: '#111' });
+    Object.assign(title.style, {
+      margin: '6px 0 12px',
+      fontFamily: 'system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif',
+      fontSize: '16px',
+      color: '#111'
+    });
 
     img = document.createElement('img');
     img.alt = 'QR';
-    Object.assign(img.style, { width: QR_SIZE + 'px', height: QR_SIZE + 'px', display: 'block', margin: '0 auto', borderRadius: '8px' });
+    Object.assign(img.style, {
+      width: QR_SIZE + 'px',
+      height: QR_SIZE + 'px',
+      display: 'block',
+      margin: '0 auto',
+      borderRadius: '8px'
+    });
 
     const hint = document.createElement('div');
-    hint.textContent = SITE_URL.replace(/^https?:\/\//,'');
-    Object.assign(hint.style, { marginTop: '12px', fontSize: '13px', color: '#444', wordBreak: 'break-all' });
+    hint.textContent = SITE_URL.replace(/^https?:\/\//, '');
+    Object.assign(hint.style, {
+      marginTop: '12px',
+      fontSize: '13px',
+      color: '#444',
+      wordBreak: 'break-all'
+    });
+
+    function hideQR() {
+      if (!overlay.parentNode) return;
+      overlay.style.opacity = '0';
+      setTimeout(() => {
+        if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+        document.documentElement.style.overflow = '';
+        document.body.style.overflow = '';
+      }, 200);
+    }
+
+    closeBtn.addEventListener('click', hideQR);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) hideQR(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') hideQR(); });
 
     box.appendChild(closeBtn);
     box.appendChild(title);
@@ -138,71 +183,44 @@ document.addEventListener('DOMContentLoaded', function () {
     box.appendChild(hint);
     overlay.appendChild(box);
 
-    return overlay;
+    overlay.__hideQR = hideQR;
   }
 
   function showQR() {
-    const url = `https://api.qrserver.com/v1/create-qr-code/?size=${QR_SIZE}x${QR_SIZE}&data=${encodeURIComponent(SITE_URL)}`;
     ensureOverlay();
+
+    const url = `https://api.qrserver.com/v1/create-qr-code/?size=${QR_SIZE}x${QR_SIZE}&data=${encodeURIComponent(SITE_URL)}`;
     img.src = url;
+
     document.body.appendChild(overlay);
-    // блокируем прокрутку фона
     document.documentElement.style.overflow = 'hidden';
     document.body.style.overflow = 'hidden';
-    // лёгкий fade-in
-    overlay.style.opacity = '0';
-    overlay.style.transition = 'opacity .2s ease';
-    requestAnimationFrame(() => overlay.style.opacity = '1');
+
+    requestAnimationFrame(() => { overlay.style.opacity = '1'; });
   }
 
-  function hideQR() {
-    if (!overlay || !overlay.parentNode) return;
-    overlay.style.opacity = '0';
-    setTimeout(() => {
-      if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
-      document.documentElement.style.overflow = '';
-      document.body.style.overflow = '';
-    }, 200);
-  }
-
-  async function handleShareClick() {
+  async function onShareClick() {
+    // Web Share работает только по user gesture, мы тут в клике — ок
     if (navigator.share) {
       try {
         await navigator.share({ title: 'Babylon Tamara', url: SITE_URL });
         return;
-      } catch (_) { /* отменили — покажем QR */ }
+      } catch (e) {
+        // отменили/не поддерживается как надо => покажем QR
+      }
     }
     showQR();
   }
 
-  // Надёжное навешивание (как в вашем коде)
-  function bind() {
-    const btn = document.querySelector(BTN_SELECTOR);
-    if (btn && !btn.__shareBound) {
-      btn.addEventListener('click', handleShareClick);
-      btn.__shareBound = true;
-    }
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', bind, { once: true });
-  } else {
-    bind();
-  }
-
-  // Делегирование и подстраховки на случай перерисовок
+  // Один обработчик на документ: работает даже если кнопка появится позже
   document.addEventListener('click', (e) => {
-    const t = e.target && e.target.closest ? e.target.closest(BTN_SELECTOR) : null;
-    if (t) handleShareClick();
-  }, true);
-
-  let tries = 0;
-  const iv = setInterval(() => { bind(); if (++tries > 20) clearInterval(iv); }, 500);
-  try {
-    const mo = new MutationObserver(bind);
-    mo.observe(document.documentElement, { childList: true, subtree: true });
-  } catch (_) {}
+    const btn = e.target && e.target.closest ? e.target.closest(BTN_SELECTOR) : null;
+    if (!btn) return;
+    e.preventDefault();
+    onShareClick();
+  }, { passive: false });
 })();
+</script>
 
   /*    // УВЕЛИЧЕНИЕ ФОТО_____________________________________________________
 
